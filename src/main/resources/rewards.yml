@@ -1,0 +1,107 @@
+# ====================================================================
+#  SlotMachine - rewards.yml  (SYMBOLES, GAINS, FREE SPINS, CAGNOTTES)
+# ====================================================================
+#
+#  Les multiplicateurs sont appliqués à la MISE PAR LIGNE.
+#  Utilise  /roulette simulate 1000000  pour mesurer le RTP (taux de redistribution)
+#  après chaque modification de poids / gains.
+#
+#  Types de symboles :
+#    NORMAL  : paie sur une ligne (paire = 2 symboles à gauche, triple = 3)
+#    WILD    : remplace les symboles NORMAL
+#    SCATTER : n'importe où sur la grille -> free spins (voir free-spins)
+#    BONUS   : n'importe où sur la grille -> roue des cagnottes (voir bonus)
+
+symbols:
+  cherry:
+    type: NORMAL
+    weight: 28
+    pair: 0.5
+    triple: 5
+  lemon:
+    type: NORMAL
+    weight: 24
+    pair: 0.5
+    triple: 8
+  grape:
+    type: NORMAL
+    weight: 20
+    pair: 0.5
+    triple: 12
+  bell:
+    type: NORMAL
+    weight: 12
+    pair: 1
+    triple: 25
+  bar:
+    type: NORMAL
+    weight: 8
+    pair: 1
+    triple: 50
+  seven:
+    type: NORMAL
+    weight: 4
+    pair: 2
+    triple: 200
+  wild:
+    type: WILD
+    weight: 4
+    pair: 0
+    triple: 500
+  scatter:
+    type: SCATTER
+    weight: 3
+    pair: 0
+    triple: 0
+  bonus:
+    type: BONUS
+    weight: 2
+    pair: 0
+    triple: 0
+
+# Un gain >= (mise totale x ce nombre) est considéré comme "big win"
+big-win-multiplier: 20
+
+# -------------------------- FREE SPINS --------------------------
+free-spins:
+  # Nombre de SCATTER sur la grille -> nombre de tours gratuits (le plus haut palier atteint s'applique)
+  awards:
+    3: 8
+    4: 12
+    5: 20
+    6: 30
+  retrigger: true             # relancer des free spins pendant les free spins
+  win-multiplier: 2.0         # multiplicateur des gains de lignes pendant les free spins
+  auto-play: true             # les free spins se lancent automatiquement
+  auto-delay-ticks: 40
+
+# -------------------------- BONUS : ROUE DES CAGNOTTES --------------------------
+bonus:
+  required: 3                 # nombre de symboles BONUS pour déclencher la roue
+
+# Cagnottes progressives.
+#  seed         : montant de départ (et de remise à zéro après un gain)
+#  contribution : % de chaque mise payante versé dans la cagnotte
+#  wheel-weight : probabilité relative que la roue s'arrête sur ce palier
+#  min-bet      : mise TOTALE minimale pour pouvoir gagner ce palier (0 = aucune)
+jackpots:
+  mini:
+    seed: 500
+    contribution: 1.5
+    wheel-weight: 60
+    min-bet: 0
+  major:
+    seed: 2500
+    contribution: 1.0
+    wheel-weight: 28
+    min-bet: 0
+  giant:
+    seed: 10000
+    contribution: 0.8
+    wheel-weight: 10
+    min-bet: 100
+  jackpot:
+    seed: 50000
+    contribution: 0.7
+    wheel-weight: 2
+    min-bet: 500

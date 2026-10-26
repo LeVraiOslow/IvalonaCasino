@@ -1,0 +1,21 @@
+name: SlotMachine
+version: '1.0.0'
+main: fr.slotmachine.SlotPlugin
+api-version: '26.2'
+description: Machine à sous de casino avec cagnottes progressives (Mini / Major / Giant / Jackpot)
+depend: [Vault]
+softdepend: [Essentials, Nexo]
+
+commands:
+  roulette:
+    description: Ouvre la machine à sous
+    aliases: [slots, slot, machine]
+    usage: /<command> [reload|pools|setpool|simulate]
+
+permissions:
+  slotmachine.use:
+    description: Autorise à jouer à la machine à sous
+    default: true
+  slotmachine.admin:
+    description: Commandes d'administration (reload, setpool, simulate)
+    default: op

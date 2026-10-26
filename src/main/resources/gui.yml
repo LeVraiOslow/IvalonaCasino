@@ -1,0 +1,154 @@
+# ====================================================================
+#  SlotMachine - gui.yml  (MENU, EMPLACEMENTS, ICÔNES)
+# ====================================================================
+#
+#  Chaque icône accepte :
+#    item         : un Material (DIAMOND) OU un item Nexo -> "nexo:id_de_litem"
+#    name / lore  : MiniMessage
+#    item-model   : "namespace:cle" (modèle d'item du resource pack, optionnel)
+#    glow         : true/false
+#    hide-tooltip : true/false
+#  Si "name"/"lore" sont absents, ceux de l'item Nexo sont conservés.
+#
+#  TITRE AVEC GLYPHE NEXO : colle directement le caractère unicode de ton glyphe Nexo
+#  dans "title" (les offsets négatifs fonctionnent aussi), ou utilise la balise
+#  <glyph:id> si ton Nexo remplace les glyphes dans les titres d'inventaire.
+#  Pour un fond complet de machine, mets un glyphe de 54 slots + "filler" en tooltip caché.
+
+title: "<gradient:gold:yellow><bold>MACHINE A SOUS</bold></gradient>"
+rows: 6
+refresh-ticks: 40            # rafraîchissement des cagnottes pendant que le menu est ouvert
+
+# Cases vides (tout slot non utilisé)
+filler:
+  item: BLACK_STAINED_GLASS_PANE
+  name: " "
+  hide-tooltip: true
+
+# Couleurs du cadre animé lors d'un gain (specs Material ou nexo:id)
+win-frame:
+  - LIME_STAINED_GLASS_PANE
+  - YELLOW_STAINED_GLASS_PANE
+  - ORANGE_STAINED_GLASS_PANE
+  - RED_STAINED_GLASS_PANE
+  - MAGENTA_STAINED_GLASS_PANE
+  - LIGHT_BLUE_STAINED_GLASS_PANE
+
+# Grille 3x3 (rangée -> slots des rouleaux 1, 2, 3)
+reels:
+  row-1: [12, 13, 14]
+  row-2: [21, 22, 23]
+  row-3: [30, 31, 32]
+
+# Icônes des cagnottes (placeholder <amount>) - la clé doit correspondre à rewards.yml
+pools:
+  mini:
+    slot: 1
+    item: COPPER_INGOT
+    name: "<#cd7f32><bold>MINI"
+    lore: ["<gray>Cagnotte : <yellow><amount>"]
+  major:
+    slot: 3
+    item: GOLD_BLOCK
+    name: "<yellow><bold>MAJOR"
+    lore: ["<gray>Cagnotte : <yellow><amount>"]
+  giant:
+    slot: 5
+    item: DIAMOND_BLOCK
+    name: "<aqua><bold>GIANT"
+    lore: ["<gray>Cagnotte : <yellow><amount>"]
+  jackpot:
+    slot: 7
+    item: NETHER_STAR
+    name: "<gradient:#ff0000:#ffd700><bold>JACKPOT"
+    lore: ["<gray>Cagnotte : <yellow><amount>", "", "<dark_gray>Mise minimale requise : voir rewards.yml"]
+
+# Boutons. Placeholders : <bet> <total> <lines> <balance> <last-win> <free-spins> <free-win>
+buttons:
+  spin:
+    slot: 49
+    item: LIME_CONCRETE
+    name: "<green><bold>LANCER"
+    lore:
+      - "<gray>Mise totale : <yellow><total>"
+      - "<gray>Lignes actives : <white><lines>"
+      - ""
+      - "<yellow>Clique pour jouer !"
+  spin-busy:
+    item: RED_CONCRETE
+    name: "<red><bold>EN COURS..."
+    lore: ["<gray>Les rouleaux tournent."]
+  spin-free:
+    item: PURPLE_CONCRETE
+    name: "<light_purple><bold>FREE SPIN"
+    lore:
+      - "<gray>Tours gratuits restants : <yellow><free-spins>"
+      - "<gray>Mise : <yellow><total>"
+      - "<gray>Gains de la série : <yellow><free-win>"
+      - ""
+      - "<yellow>Clique pour jouer !"
+  # Boutons de mise : un par valeur de "bets" (config.yml), dans l'ordre
+  bet:
+    slots: [45, 46, 47, 48]
+    item: GOLD_NUGGET
+    name: "<yellow>Mise : <white><bet>"
+    lore: ["<gray>Coût total : <yellow><total>", "", "<gray>Clique pour choisir"]
+  bet-selected:
+    item: GOLD_INGOT
+    name: "<green><bold>Mise : <white><bet>"
+    lore: ["<gray>Coût total : <yellow><total>", "", "<green>Mise sélectionnée"]
+    glow: true
+  # Icônes personnalisées par montant (ex: jetons Nexo), optionnel :
+  bet-icons: {}
+  #  "10": "nexo:chip_green"
+  #  "50": "nexo:chip_blue"
+  info:
+    slot: 50
+    item: PAPER
+    name: "<gold>Ton compte"
+    lore:
+      - "<gray>Solde : <yellow><balance>"
+      - "<gray>Dernier gain : <yellow><last-win>"
+      - "<gray>Free spins : <light_purple><free-spins>"
+  paytable:
+    slot: 51
+    item: BOOK
+    name: "<gold><bold>Table des gains"
+    lore: []                   # les lignes de gains sont ajoutées automatiquement (messages.yml -> paytable)
+  close:
+    slot: 53
+    item: BARRIER
+    name: "<red>Fermer"
+
+# Symboles (la clé doit correspondre à rewards.yml). Exemples Nexo : "nexo:slot_cherry"
+symbols:
+  cherry:
+    item: SWEET_BERRIES
+    name: "<red>Cerise"
+  lemon:
+    item: YELLOW_DYE
+    name: "<yellow>Citron"
+  grape:
+    item: AMETHYST_SHARD
+    name: "<light_purple>Raisin"
+  bell:
+    item: BELL
+    name: "<gold>Cloche"
+  bar:
+    item: GOLD_INGOT
+    name: "<yellow><bold>BAR"
+  seven:
+    item: DIAMOND
+    name: "<red><bold>7"
+  wild:
+    item: ENCHANTED_GOLDEN_APPLE
+    name: "<gold><bold>WILD"
+    lore: ["<gray>Remplace les autres symboles"]
+  scatter:
+    item: ENDER_EYE
+    name: "<light_purple><bold>SCATTER"
+    lore: ["<gray>3+ n'importe où = free spins"]
+  bonus:
+    item: HEART_OF_THE_SEA
+    name: "<aqua><bold>BONUS"
+    lore: ["<gray>3+ n'importe où = roue des cagnottes"]

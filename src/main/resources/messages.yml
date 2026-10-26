@@ -1,0 +1,98 @@
+# ====================================================================
+#  SlotMachine - messages.yml  (TOUS LES TEXTES - format MiniMessage)
+#  Laisse un message vide ("") pour le désactiver.
+#  <prefix> est remplacé par le préfixe ci-dessous.
+# ====================================================================
+
+prefix: "<gold><bold>SLOTS</bold> <dark_gray>» <reset>"
+
+# Noms affichés des cagnottes (placeholder <tier>)
+tiers:
+  mini: "<#cd7f32><bold>MINI</bold>"
+  major: "<yellow><bold>MAJOR</bold>"
+  giant: "<aqua><bold>GIANT</bold>"
+  jackpot: "<gradient:#ff0000:#ffd700><bold>JACKPOT</bold></gradient>"
+
+# ------------------------ Général / commandes ------------------------
+no-permission: "<prefix><red>Tu n'as pas la permission."
+players-only: "<prefix><red>Cette commande est réservée aux joueurs."
+economy-missing: "<prefix><red>Aucune économie détectée (Vault + Essentials requis)."
+world-disabled: "<prefix><red>La machine à sous est désactivée dans ce monde."
+not-enough-money: "<prefix><red>Il te faut <yellow><total></yellow> pour cette mise (solde : <yellow><balance></yellow>)."
+transaction-failed: "<prefix><red>La transaction a échoué, mise annulée."
+deposit-failed: "<prefix><red>Impossible de te verser <yellow><win></yellow>, préviens un administrateur !"
+reloaded: "<prefix><green>Configuration rechargée."
+unknown-subcommand: "<prefix><red>Sous-commande inconnue. <gray>/roulette [reload|pools|setpool|simulate]"
+pools-header: "<prefix><gold>Cagnottes actuelles :"
+pools-line: "<dark_gray> - <tier><gray> : <yellow><amount>"
+setpool-usage: "<prefix><red>/roulette setpool <tier> <montant>"
+setpool-unknown: "<prefix><red>Cagnotte inconnue : <yellow><tier>"
+setpool-ok: "<prefix><green>Cagnotte <tier><green> définie à <yellow><amount>"
+simulate-usage: "<prefix><red>/roulette simulate <nombre_de_tours>"
+simulate-start: "<prefix><gray>Simulation de <yellow><spins></yellow> tours en cours..."
+simulate-result:
+  - "<prefix><gold>Résultat de la simulation (<spins> tours) :"
+  - "<dark_gray> - <gray>RTP lignes (hors free spins) : <yellow><line-rtp>"
+  - "<dark_gray> - <gray>RTP free spins : <yellow><free-rtp>"
+  - "<dark_gray> - <gray>RTP cagnottes (théorique) : <yellow><pool-rtp>"
+  - "<dark_gray> - <gray>RTP total estimé : <green><total-rtp>"
+  - "<dark_gray> - <gray>Fréquence de gain : <yellow><hit>"
+  - "<dark_gray> - <gray>Fréquence roue bonus : <yellow><bonus> <gray>| free spins : <yellow><free-trigger>"
+
+# ------------------------ Résultats d'un tour ------------------------
+# Placeholders : <win> gain total, <bet> mise totale, <mult> multiplicateur de lignes,
+#   <spins> free spins gagnés, <free-left> free spins restants, <tier> palier, <prize> gain cagnotte,
+#   <player> pseudo, <series-win> total d'une série de free spins
+results:
+  lose: "<prefix><gray>Perdu... <dark_gray>(mise <bet>)"
+  pair: "<prefix><green>Paire ! <gray>Tu gagnes <yellow><win>"
+  triple: "<prefix><green><bold>TRIPLE !</bold> <gray>Tu gagnes <yellow><win> <dark_gray>(x<mult>)"
+  big: "<prefix><gold><bold>BIG WIN !</bold> <gray>Tu remportes <yellow><win>"
+  free-spins: "<prefix><light_purple><bold>FREE SPINS !</bold> <gray>+<yellow><spins></yellow> tours gratuits<gray> (restants : <yellow><free-left></yellow>)"
+  mini: "<prefix><tier> <gray>! Tu remportes <yellow><win>"
+  major: "<prefix><tier> <gray>! Tu remportes <yellow><win>"
+  giant: "<prefix><tier> <gray>! Tu remportes <yellow><win>"
+  jackpot: "<prefix><tier> <gray>!!! Tu remportes <yellow><win>"
+  free-spin-lose: ""
+  free-spins-end: "<prefix><light_purple>Fin des free spins ! <gray>Total gagné : <yellow><series-win>"
+
+# ------------------------ Titres à l'écran (par catégorie) ------------------------
+titles:
+  big:
+    title: "<gold><bold>BIG WIN</bold>"
+    subtitle: "<yellow>+<win>"
+  free-spins:
+    title: "<light_purple><bold>FREE SPINS</bold>"
+    subtitle: "<yellow>+<spins> tours gratuits"
+  mini:
+    title: "<tier>"
+    subtitle: "<yellow>+<win>"
+  major:
+    title: "<tier>"
+    subtitle: "<yellow>+<win>"
+  giant:
+    title: "<tier>"
+    subtitle: "<yellow>+<win>"
+  jackpot:
+    title: "<tier>"
+    subtitle: "<yellow>+<win>"
+
+# ------------------------ Annonces globales (broadcast) ------------------------
+broadcast:
+  big: ""
+  mini: ""
+  major: "<prefix><yellow><player> <gray>vient de remporter le <tier> <gray>: <yellow><win> <gray>!"
+  giant: "<prefix><yellow><player> <gray>vient de remporter le <tier> <gray>: <yellow><win> <gray>!"
+  jackpot: "<prefix><yellow><player> <gray>vient de décrocher le <tier> <gray>: <green><win> <gray>!!!"
+
+# ------------------------ Table des gains (lore de l'icône) ------------------------
+paytable:
+  header:
+    - "<dark_gray>------------------------"
+    - "<gold>Gains <gray>(x mise par ligne)"
+  line: "<symbol> <gray>paire <yellow><pair> <dark_gray>| <gray>triple <green><triple>"
+  line-wild: "<symbol> <gray>remplace les autres | triple <green><triple>"
+  line-scatter: "<symbol> <gray>n'importe où : <light_purple>free spins"
+  line-bonus: "<symbol> <gray><required>+ : <light_purple>roue des cagnottes"
+  footer:
+    - "<dark_gray>------------------------"

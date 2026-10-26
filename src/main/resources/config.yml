@@ -1,0 +1,115 @@
+# ====================================================================
+#  SlotMachine - config.yml  (PARAMÈTRES GÉNÉRAUX)
+#  Autres fichiers :
+#    messages.yml -> tous les textes (chat, titres, broadcast, table des gains)
+#    rewards.yml  -> symboles, gains, free spins, cagnottes Mini/Major/Giant/Jackpot
+#    gui.yml      -> menu, emplacements, icônes (Material ou Nexo)
+# ====================================================================
+
+general:
+  # Mondes où la machine est interdite
+  disabled-worlds: []
+  # Sauvegarde des cagnottes (data.yml) toutes les X secondes
+  autosave-seconds: 30
+
+economy:
+  # Locale utilisée pour formater les nombres (ex: en-US, fr-FR)
+  locale: "en-US"
+  # Format DecimalFormat
+  format: "#,##0.##"
+  # Affichage final ; <amount> = montant formaté
+  display: "<amount> $"
+
+# Mises proposées, PAR LIGNE de paiement (le coût total = mise x nombre de lignes actives).
+# Un bouton de mise est affiché par valeur (voir gui.yml -> buttons.bet.slots).
+bets: [10, 50, 100, 500]
+
+# Lignes de paiement : la grille fait 3 rouleaux x 3 rangées.
+# Chaque ligne = la rangée (0 = haut, 1 = milieu, 2 = bas) lue sur chaque rouleau.
+paylines:
+  active: [middle]            # ex: [middle, top, bottom, diagonal-down, diagonal-up]
+  lines:
+    middle: [1, 1, 1]
+    top: [0, 0, 0]
+    bottom: [2, 2, 2]
+    diagonal-down: [0, 1, 2]
+    diagonal-up: [2, 1, 0]
+
+# -------------------------- ANIMATIONS (en ticks, 20 = 1s) --------------------------
+animation:
+  shift-period: 2             # vitesse de défilement des rouleaux
+  first-reel-ticks: 30        # durée avant l'arrêt du rouleau 1
+  reel-stagger-ticks: 12      # délai d'arrêt supplémentaire entre chaque rouleau
+  # Suspense façon casino : le dernier rouleau ralentit si 2 symboles spéciaux sont déjà sortis
+  tease:
+    enabled: true
+    symbol-types: [BONUS, SCATTER]
+    min-symbols: 2
+    extra-ticks: 30
+  # Clignotement des symboles gagnants + cadre arc-en-ciel
+  win-flash:
+    duration-ticks: 50
+    period-ticks: 5
+  # Roue des cagnottes (les 4 icônes de cagnotte s'allument tour à tour)
+  wheel:
+    steps: 28
+    start-delay: 2
+    end-delay: 9
+    hold-ticks: 40
+  title-times:
+    fade-in: 10
+    stay: 60
+    fade-out: 20
+
+# -------------------------- SONS --------------------------
+# Format : "clé_du_son;volume;pitch;délai_en_ticks(optionnel)"
+# Les sons personnalisés du resource pack Nexo fonctionnent aussi (ex: "nexo:slot.spin;1;1")
+sounds:
+  open: "minecraft:block.chest.open;0.8;1.2"
+  click: "minecraft:ui.button.click;0.8;1.2"
+  no-money: "minecraft:entity.villager.no;1;1"
+  spin-start: "minecraft:block.lever.click;1;0.8"
+  reel-tick: "minecraft:block.note_block.hat;0.5;1.6"
+  reel-stop: "minecraft:block.note_block.bell;0.9;1.0"
+  anticipation: "minecraft:block.beacon.power_select;1;1.5"
+  special-land: "minecraft:block.amethyst_block.chime;1;1.2"
+  wheel-start: "minecraft:block.beacon.activate;1;1.2"
+  wheel-tick: "minecraft:block.note_block.pling;0.8;1.4"
+  wheel-stop: "minecraft:entity.player.levelup;1;1"
+
+# -------------------------- EFFETS PAR RÉSULTAT --------------------------
+# Catégories : lose, pair, triple, big, free-spins, mini, major, giant, jackpot
+# Chaque catégorie : sounds (liste), particles (type/count/speed), fireworks (nombre)
+effects:
+  firework-colors: ["#FFD700", "#FF3B3B", "#3BFF6B", "#3BA8FF", "#FF3BE5"]
+  lose:
+    sounds: ["minecraft:block.note_block.bass;1;0.6"]
+  pair:
+    sounds: ["minecraft:entity.experience_orb.pickup;1;1.2"]
+    particles: { type: happy_villager, count: 12, speed: 0.05 }
+  triple:
+    sounds: ["minecraft:entity.player.levelup;1;1.1", "minecraft:entity.experience_orb.pickup;1;1.6;6"]
+    particles: { type: totem_of_undying, count: 25, speed: 0.3 }
+  big:
+    sounds: ["minecraft:ui.toast.challenge_complete;1;1", "minecraft:entity.firework_rocket.blast;1;1;8"]
+    particles: { type: firework, count: 40, speed: 0.2 }
+    fireworks: 2
+  free-spins:
+    sounds: ["minecraft:block.beacon.activate;1;1.4", "minecraft:entity.player.levelup;1;1.4;10"]
+    particles: { type: end_rod, count: 40, speed: 0.15 }
+  mini:
+    sounds: ["minecraft:ui.toast.challenge_complete;1;1.3"]
+    particles: { type: firework, count: 40, speed: 0.2 }
+    fireworks: 3
+  major:
+    sounds: ["minecraft:ui.toast.challenge_complete;1;1.1", "minecraft:entity.firework_rocket.twinkle;1;1;10"]
+    particles: { type: totem_of_undying, count: 60, speed: 0.4 }
+    fireworks: 6
+  giant:
+    sounds: ["minecraft:ui.toast.challenge_complete;1;0.9", "minecraft:entity.firework_rocket.twinkle;1;1;10", "minecraft:entity.firework_rocket.blast;1;1;20"]
+    particles: { type: totem_of_undying, count: 90, speed: 0.5 }
+    fireworks: 10
+  jackpot:
+    sounds: ["minecraft:ui.toast.challenge_complete;1;0.7", "minecraft:entity.ender_dragon.growl;0.6;1.2;10", "minecraft:entity.firework_rocket.twinkle;1;1;30"]
+    particles: { type: totem_of_undying, count: 150, speed: 0.6 }
+    fireworks: 20
