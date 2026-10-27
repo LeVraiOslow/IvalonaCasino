@@ -110,6 +110,7 @@ public final class Rewards {
     public List<Symbol> symbols() { return symbols; }
     public Map<String, Tier> tiers() { return tiers; }
     public int bonusRequired() { return bonusRequired; }
+    public Map<Integer, Integer> freeSpinAwards() { return freeSpinAwards; }
     public boolean bonusCards() { return bonusCards; }
     public int matchRequired() { return matchRequired; }
     public Map<String, Integer> cardWeights() { return cardWeights; }

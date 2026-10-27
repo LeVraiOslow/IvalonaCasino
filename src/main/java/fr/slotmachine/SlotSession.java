@@ -286,32 +286,81 @@ public final class SlotSession implements InventoryHolder {
                 tagsFor(currentBet())));
     }
 
-    private void renderPaytable() {
-        ItemStack it = plugin.items().build(gui.getConfigurationSection("buttons.paytable"), Material.BOOK);
-        ItemMeta meta = it.getItemMeta();
-        if (meta == null) return;
+    /** Nom de balise valide (minuscules, chiffres, _ et -). */
+    private static String tagName(String id) {
+        return id.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_-]", "_");
+    }
+
+    /**
+     * Placeholders de la table des gains, utilisables dans buttons.paytable.lore (gui.yml) :
+     *   <ID-pair> <ID-triple> <ID-name>         pour chaque symbole de rewards.yml (ex: <cherry-pair>)
+     *   <tier-ID> <minbet-ID> <pool-ID>         pour chaque cagnotte (nom, mise minimale, montant actuel)
+     *   <free-spins-N>                          free spins pour N scatters (rewards.yml -> free-spins.awards)
+     *   <free-multiplier> <bonus-required> <match-required> <lines>
+     */
+    private TagResolver paytableTags() {
+        Rewards rw = plugin.rewards();
         Msg msg = plugin.msg();
+        FileConfiguration m = plugin.configs().messages();
         String none = msg.raw("paytable.none");
         String multFmt = msg.raw("paytable.mult");
-        List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
-        for (String h : msg.list("paytable.header")) lore.add(msg.item(h));
-        for (Symbol s : plugin.rewards().symbols()) {
-            String name = gui.getString("symbols." + s.id() + ".name", s.id());
-            String lineKey = switch (s.type()) {
-                case NORMAL -> "paytable.line";
-                case WILD -> "paytable.line-wild";
-                case SCATTER -> "paytable.line-scatter";
-                case BONUS -> "paytable.line-bonus";
-            };
-            lore.add(msg.item(msg.raw(lineKey),
-                    Placeholder.parsed("symbol", msg.color(name)),
-                    Placeholder.unparsed("pair", s.pair() > 0 ? multFmt.replace("<value>", trim(s.pair())) : none),
-                    Placeholder.unparsed("triple", multFmt.replace("<value>", trim(s.triple()))),
-                    Placeholder.unparsed("required", String.valueOf(plugin.rewards().bonusRequired()))));
+        TagResolver.Builder b = TagResolver.builder();
+        b.resolver(tagsFor(currentBet()));
+        for (Symbol s : rw.symbols()) {
+            String id = tagName(s.id());
+            b.resolver(Placeholder.unparsed(id + "-pair", s.pair() > 0 ? multFmt.replace("<value>", trim(s.pair())) : none));
+            b.resolver(Placeholder.unparsed(id + "-triple", multFmt.replace("<value>", trim(s.triple()))));
+            b.resolver(Placeholder.parsed(id + "-name", msg.color(gui.getString("symbols." + s.id() + ".name", s.id()))));
         }
-        for (String f : msg.list("paytable.footer")) lore.add(msg.item(f));
-        meta.lore(lore);
-        it.setItemMeta(meta);
+        for (Tier t : rw.tiers().values()) {
+            String id = tagName(t.id());
+            String n = m.getString("tiers." + t.id());
+            b.resolver(Placeholder.parsed("tier-" + id, msg.color(n == null ? t.id().toUpperCase(Locale.ROOT) : n)));
+            b.resolver(Placeholder.unparsed("minbet-" + id, fmt(t.minBet())));
+            b.resolver(Placeholder.unparsed("pool-" + id, fmt(poolAmount(t.id()))));
+        }
+        for (Map.Entry<Integer, Integer> e : rw.freeSpinAwards().entrySet()) {
+            b.resolver(Placeholder.unparsed("free-spins-" + e.getKey(), String.valueOf(e.getValue())));
+        }
+        b.resolver(Placeholder.unparsed("free-multiplier", trim(rw.freeMultiplier())));
+        b.resolver(Placeholder.unparsed("bonus-required", String.valueOf(rw.bonusRequired())));
+        b.resolver(Placeholder.unparsed("match-required", String.valueOf(rw.matchRequired())));
+        return b.build();
+    }
+
+    private void renderPaytable() {
+        ConfigurationSection sec = gui.getConfigurationSection("buttons.paytable");
+        ItemStack it = plugin.items().build(sec, Material.BOOK, paytableTags());
+
+        // Lore vide dans gui.yml -> ancien mode : lignes générées depuis messages.yml (paytable.*)
+        boolean custom = sec != null && !sec.getStringList("lore").isEmpty();
+        if (!custom) {
+            ItemMeta meta = it.getItemMeta();
+            if (meta != null) {
+                Msg msg = plugin.msg();
+                String none = msg.raw("paytable.none");
+                String multFmt = msg.raw("paytable.mult");
+                List<Component> lore = new ArrayList<>();
+                for (String h : msg.list("paytable.header")) lore.add(msg.item(h));
+                for (Symbol s : plugin.rewards().symbols()) {
+                    String name = gui.getString("symbols." + s.id() + ".name", s.id());
+                    String lineKey = switch (s.type()) {
+                        case NORMAL -> "paytable.line";
+                        case WILD -> "paytable.line-wild";
+                        case SCATTER -> "paytable.line-scatter";
+                        case BONUS -> "paytable.line-bonus";
+                    };
+                    lore.add(msg.item(msg.raw(lineKey),
+                            Placeholder.parsed("symbol", msg.color(name)),
+                            Placeholder.unparsed("pair", s.pair() > 0 ? multFmt.replace("<value>", trim(s.pair())) : none),
+                            Placeholder.unparsed("triple", multFmt.replace("<value>", trim(s.triple()))),
+                            Placeholder.unparsed("required", String.valueOf(plugin.rewards().bonusRequired()))));
+                }
+                for (String f : msg.list("paytable.footer")) lore.add(msg.item(f));
+                meta.lore(lore);
+                it.setItemMeta(meta);
+            }
+        }
         put(paytableSlots, it);
     }
 
