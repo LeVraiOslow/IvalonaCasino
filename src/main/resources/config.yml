@@ -22,7 +22,7 @@ economy:
 
 # Mises proposées, PAR LIGNE de paiement (le coût total = mise x nombre de lignes actives).
 # Un bouton de mise est affiché par valeur (voir gui.yml -> buttons.bet.slots).
-bets: [10, 50, 100, 500]
+bets: [1000, 10000, 100000, 1000000]
 
 # Lignes de paiement : la grille fait 3 rouleaux x 3 rangées.
 # Chaque ligne = la rangée (0 = haut, 1 = milieu, 2 = bas) lue sur chaque rouleau.

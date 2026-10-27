@@ -22,7 +22,11 @@ not-enough-money: "<prefix><red>Il te faut <yellow><total></yellow> pour cette m
 transaction-failed: "<prefix><red>La transaction a échoué, mise annulée."
 deposit-failed: "<prefix><red>Impossible de te verser <yellow><win></yellow>, préviens un administrateur !"
 reloaded: "<prefix><green>Configuration rechargée."
-unknown-subcommand: "<prefix><red>Sous-commande inconnue. <gray>/roulette [reload|pools|setpool|simulate]"
+reload-error: "<prefix><red>Erreur de rechargement : <gray><error>"
+resetpools-ok: "<prefix><green>Toutes les cagnottes ont été remises à leur montant de départ."
+checkitems-missing: "<prefix><red>Item introuvable : <yellow><spec> <gray>(<path>)"
+checkitems-result: "<prefix><gray>Vérification terminée : <green><ok></green>/<white><total></white> items valides."
+unknown-subcommand: "<prefix><red>Sous-commande inconnue. <gray>/roulette [reload|pools|setpool|resetpools|checkitems|simulate]"
 pools-header: "<prefix><gold>Cagnottes actuelles :"
 pools-line: "<dark_gray> - <tier><gray> : <yellow><amount>"
 setpool-usage: "<prefix><red>/roulette setpool <tier> <montant>"
@@ -87,6 +91,8 @@ broadcast:
 
 # ------------------------ Table des gains (lore de l'icône) ------------------------
 paytable:
+  mult: "x<value>"          # format d'un multiplicateur (<value>)
+  none: "-"                 # affiché quand une paire ne paie rien
   header:
     - "<dark_gray>------------------------"
     - "<gold>Gains <gray>(x mise par ligne)"

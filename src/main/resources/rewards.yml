@@ -79,29 +79,39 @@ free-spins:
 bonus:
   required: 3                 # nombre de symboles BONUS pour déclencher la roue
 
-# Cagnottes progressives.
+# Cagnottes progressives, COMMUNES À TOUS LES JOUEURS (une seule cagnotte par palier, stockée dans data.yml).
+# Chaque mise payante de n'importe quel joueur les fait augmenter ; le gagnant les remporte puis
+# elles repartent de "seed".
 #  seed         : montant de départ (et de remise à zéro après un gain)
-#  contribution : % de chaque mise payante versé dans la cagnotte
+#  contribution : % de chaque mise payante (mise totale) versé dans la cagnotte
 #  wheel-weight : probabilité relative que la roue s'arrête sur ce palier
 #  min-bet      : mise TOTALE minimale pour pouvoir gagner ce palier (0 = aucune)
+#
+# Barème pour des mises de 1.000 / 10.000 / 100.000 / 1.000.000 :
+#  - mise 1.000      -> seul MINI est possible
+#  - mise 10.000     -> MINI ou MAJOR
+#  - mise 100.000    -> + GIANT
+#  - mise 1.000.000  -> + JACKPOT
+# Les gains de lignes (paires, triples, free spins...) sont des multiplicateurs de la mise :
+# ils s'adaptent donc automatiquement. Seules les cagnottes sont en montant fixe.
 jackpots:
   mini:
-    seed: 500
+    seed: 100000
     contribution: 1.5
     wheel-weight: 60
     min-bet: 0
   major:
-    seed: 2500
+    seed: 1000000
     contribution: 1.0
     wheel-weight: 28
-    min-bet: 0
+    min-bet: 10000
   giant:
-    seed: 10000
+    seed: 10000000
     contribution: 0.8
     wheel-weight: 10
-    min-bet: 100
+    min-bet: 100000
   jackpot:
-    seed: 50000
+    seed: 100000000
     contribution: 0.7
     wheel-weight: 2
-    min-bet: 500
+    min-bet: 1000000
