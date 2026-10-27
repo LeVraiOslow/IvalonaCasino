@@ -50,7 +50,7 @@ public final class SlotSession implements InventoryHolder {
     private final int[][] reelSlots = new int[3][3];
     private final Map<String, int[]> poolSlots = new LinkedHashMap<>();
     private final List<int[]> betSlots = new ArrayList<>();
-    private int[] spinSlots = {49}, infoSlots = {50}, paytableSlots = {51}, closeSlots = {53};
+    private int[] spinSlots = {49}, infoSlots = {50}, paytableSlots = {51};
     private final Set<Integer> fillers = new HashSet<>();
     private boolean fillerEnabled, frameEnabled;
 
@@ -176,11 +176,9 @@ public final class SlotSession implements InventoryHolder {
         spinSlots = slotsOf("buttons.spin", 49);
         infoSlots = slotsOf("buttons.info", 50);
         paytableSlots = slotsOf("buttons.paytable", 51);
-        closeSlots = slotsOf("buttons.close", 53);
         for (int x : spinSlots) used.add(x);
         for (int x : infoSlots) used.add(x);
         for (int x : paytableSlots) used.add(x);
-        for (int x : closeSlots) used.add(x);
 
         fillerEnabled = gui.getBoolean("filler.enabled", false);
         frameEnabled = gui.getBoolean("win-frame.enabled", false);
@@ -247,7 +245,6 @@ public final class SlotSession implements InventoryHolder {
         renderSpin();
         renderInfo();
         renderPaytable();
-        put(closeSlots, plugin.items().build(gui.getConfigurationSection("buttons.close"), Material.BARRIER));
     }
 
     private void renderPools() {
@@ -374,10 +371,6 @@ public final class SlotSession implements InventoryHolder {
         if (closed) return;
         if (contains(spinSlots, slot)) {
             spin();
-            return;
-        }
-        if (contains(closeSlots, slot)) {
-            player.closeInventory();
             return;
         }
         for (int i = 0; i < betSlots.size() && i < plugin.bets().size(); i++) {
