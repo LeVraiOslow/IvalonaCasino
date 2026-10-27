@@ -60,19 +60,36 @@ public final class ItemFactory {
     }
 
     private ItemStack nexo(String id) {
-        if (!Bukkit.getPluginManager().isPluginEnabled("Nexo")) return null;
+        if (!Bukkit.getPluginManager().isPluginEnabled("Nexo")) {
+            warnOnce("nonexo", "Un item 'nexo:...' est configuré mais le plugin Nexo n'est pas actif.");
+            return null;
+        }
         try {
             Class<?> api = Class.forName("com.nexomc.nexo.api.NexoItems");
             Method m = api.getMethod("itemFromId", String.class);
             Object target = Modifier.isStatic(m.getModifiers()) ? null : api.getField("INSTANCE").get(null);
             Object builder = m.invoke(target, id);
             if (builder == null) return null;
-            Object stack = builder.getClass().getMethod("build").invoke(builder);
-            return stack instanceof ItemStack is ? is : null;
+            for (String name : new String[]{"build", "getFinalItemStack", "getReferenceStack"}) {
+                try {
+                    Object o = builder.getClass().getMethod(name).invoke(builder);
+                    if (o instanceof ItemStack is) return is;
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+            warnOnce("nobuild", "API Nexo : impossible de construire l'item '" + id + "' (méthode build introuvable).");
+            return null;
         } catch (Throwable t) {
             warnOnce("err:" + id, "Erreur d'appel à l'API Nexo pour '" + id + "' : " + t);
             return null;
         }
+    }
+
+    /** Vrai si la spec (Material ou nexo:id) est utilisable. Sert à /roulette checkitems. */
+    public boolean exists(String spec) {
+        if (spec.regionMatches(true, 0, "nexo:", 0, 5)) return nexo(spec.substring(5).trim()) != null;
+        Material m = Material.matchMaterial(spec);
+        return m != null && m.isItem() && !m.isAir();
     }
 
     private void warnOnce(String key, String message) {

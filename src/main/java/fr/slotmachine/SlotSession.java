@@ -48,10 +48,11 @@ public final class SlotSession implements InventoryHolder {
 
     // layout
     private final int[][] reelSlots = new int[3][3];
-    private final Map<String, Integer> poolSlots = new LinkedHashMap<>();
-    private int[] betSlots = new int[0];
-    private int spinSlot = 49, infoSlot = 50, paytableSlot = 51, closeSlot = 53;
+    private final Map<String, int[]> poolSlots = new LinkedHashMap<>();
+    private final List<int[]> betSlots = new ArrayList<>();
+    private int[] spinSlots = {49}, infoSlots = {50}, paytableSlots = {51}, closeSlots = {53};
     private final Set<Integer> fillers = new HashSet<>();
+    private boolean fillerEnabled, frameEnabled;
 
     private final Map<String, ItemStack> symbolItems = new HashMap<>();
     private final Symbol[][] shown = new Symbol[3][3];
@@ -99,6 +100,38 @@ public final class SlotSession implements InventoryHolder {
         return slot >= 0 && slot < inv.getSize();
     }
 
+    /** Lit "slots: [..]" (plusieurs emplacements pour un même objet) ou "slot: n". */
+    private int[] slotsOf(String path, int... def) {
+        ConfigurationSection sec = gui.getConfigurationSection(path);
+        List<Integer> out = new ArrayList<>();
+        if (sec != null) {
+            if (sec.isList("slots")) {
+                for (int v : sec.getIntegerList("slots")) if (ok(v)) out.add(v);
+            } else {
+                int v = sec.getInt("slot", -1);
+                if (ok(v)) out.add(v);
+            }
+        }
+        if (out.isEmpty()) for (int d : def) if (ok(d)) out.add(d);
+        return out.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static boolean contains(int[] arr, int v) {
+        for (int a : arr) if (a == v) return true;
+        return false;
+    }
+
+    /** Pose le même item sur tous les slots donnés (null = slot laissé vide). */
+    private void put(int[] slots, ItemStack item) {
+        for (int s : slots) inv.setItem(s, item == null ? null : item.clone());
+    }
+
+    /** Appelé quand une cagnotte change à cause d'un autre joueur. */
+    void refreshLive() {
+        if (closed || busy) return;
+        renderPools();
+    }
+
     private void loadLayout() {
         Set<Integer> used = new HashSet<>();
         for (int r = 0; r < 3; r++) {
@@ -112,32 +145,43 @@ public final class SlotSession implements InventoryHolder {
         ConfigurationSection ps = gui.getConfigurationSection("pools");
         if (ps != null) {
             for (String id : ps.getKeys(false)) {
-                int slot = ps.getInt(id + ".slot", -1);
-                if (ok(slot) && plugin.rewards().tiers().containsKey(id)) {
-                    poolSlots.put(id, slot);
-                    used.add(slot);
+                int[] sl = slotsOf("pools." + id);
+                if (sl.length > 0 && plugin.rewards().tiers().containsKey(id)) {
+                    poolSlots.put(id, sl);
+                    for (int x : sl) used.add(x);
                 }
             }
         }
-        List<Integer> bs = gui.getIntegerList("buttons.bet.slots");
-        List<Integer> valid = new ArrayList<>();
-        for (int s : bs) if (ok(s)) valid.add(s);
-        if (valid.size() < plugin.bets().size()) {
-            plugin.getLogger().warning("gui.yml : " + plugin.bets().size() + " mises configurées mais seulement "
-                    + valid.size() + " emplacements dans buttons.bet.slots.");
+        // Chaque entrée de buttons.bet.slots = un slot (45) OU plusieurs slots ([45, 46])
+        for (Object o : gui.getList("buttons.bet.slots", List.of())) {
+            List<Integer> g = new ArrayList<>();
+            if (o instanceof Number num) {
+                if (ok(num.intValue())) g.add(num.intValue());
+            } else if (o instanceof List<?> l) {
+                for (Object x : l) if (x instanceof Number num2 && ok(num2.intValue())) g.add(num2.intValue());
+            }
+            if (!g.isEmpty()) {
+                int[] arr = g.stream().mapToInt(Integer::intValue).toArray();
+                betSlots.add(arr);
+                for (int x : arr) used.add(x);
+            }
         }
-        betSlots = valid.stream().mapToInt(Integer::intValue).toArray();
-        for (int s : betSlots) used.add(s);
+        if (betSlots.size() < plugin.bets().size()) {
+            plugin.getLogger().warning("gui.yml : " + plugin.bets().size() + " mises configurées mais seulement "
+                    + betSlots.size() + " emplacements dans buttons.bet.slots.");
+        }
 
-        spinSlot = gui.getInt("buttons.spin.slot", 49);
-        infoSlot = gui.getInt("buttons.info.slot", 50);
-        paytableSlot = gui.getInt("buttons.paytable.slot", 51);
-        closeSlot = gui.getInt("buttons.close.slot", 53);
-        used.add(spinSlot);
-        used.add(infoSlot);
-        used.add(paytableSlot);
-        used.add(closeSlot);
+        spinSlots = slotsOf("buttons.spin", 49);
+        infoSlots = slotsOf("buttons.info", 50);
+        paytableSlots = slotsOf("buttons.paytable", 51);
+        closeSlots = slotsOf("buttons.close", 53);
+        for (int x : spinSlots) used.add(x);
+        for (int x : infoSlots) used.add(x);
+        for (int x : paytableSlots) used.add(x);
+        for (int x : closeSlots) used.add(x);
 
+        fillerEnabled = gui.getBoolean("filler.enabled", false);
+        frameEnabled = gui.getBoolean("win-frame.enabled", false);
         for (int i = 0; i < inv.getSize(); i++) if (!used.contains(i)) fillers.add(i);
     }
 
@@ -186,43 +230,47 @@ public final class SlotSession implements InventoryHolder {
         inv.setItem(reelSlots[r][c], symbolItem(shown[r][c], glow));
     }
 
+    /** null si les cases vides doivent rester vides (filler.enabled: false). */
     private ItemStack filler() {
+        if (!fillerEnabled) return null;
         return plugin.items().build(gui.getConfigurationSection("filler"), Material.BLACK_STAINED_GLASS_PANE);
     }
 
     private void renderAll() {
         ItemStack f = filler();
-        for (int s : fillers) inv.setItem(s, f);
+        for (int slot : fillers) inv.setItem(slot, f);
         for (int r = 0; r < 3; r++) for (int c = 0; c < 3; c++) renderCell(r, c, false);
         renderPools();
         renderBets();
         renderSpin();
         renderInfo();
         renderPaytable();
-        inv.setItem(closeSlot, plugin.items().build(gui.getConfigurationSection("buttons.close"), Material.BARRIER));
+        put(closeSlots, plugin.items().build(gui.getConfigurationSection("buttons.close"), Material.BARRIER));
     }
 
     private void renderPools() {
-        for (Map.Entry<String, Integer> e : poolSlots.entrySet()) {
+        for (Map.Entry<String, int[]> e : poolSlots.entrySet()) {
             String id = e.getKey();
+            Tier tier = plugin.rewards().tiers().get(id);
             double amount = frozen.containsKey(id) ? frozen.get(id) : plugin.pools().get(id);
             ItemStack it = plugin.items().build(gui.getConfigurationSection("pools." + id), Material.GOLD_INGOT,
-                    Placeholder.unparsed("amount", fmt(amount)));
-            inv.setItem(e.getValue(), ItemFactory.glow(it, id.equals(highlight)));
+                    Placeholder.unparsed("amount", fmt(amount)),
+                    Placeholder.unparsed("min-bet", fmt(tier == null ? 0 : tier.minBet())));
+            put(e.getValue(), ItemFactory.glow(it, id.equals(highlight)));
         }
     }
 
     private void renderBets() {
         List<Double> bets = plugin.bets();
-        for (int i = 0; i < betSlots.length; i++) {
+        for (int i = 0; i < betSlots.size(); i++) {
             if (i >= bets.size()) {
-                inv.setItem(betSlots[i], filler());
+                put(betSlots.get(i), filler());
                 continue;
             }
             double b = bets.get(i);
             ConfigurationSection s = gui.getConfigurationSection(i == betIndex ? "buttons.bet-selected" : "buttons.bet");
             String icon = gui.getString("buttons.bet-icons." + key(b));
-            inv.setItem(betSlots[i], plugin.items().build(s, icon, Material.GOLD_NUGGET, tagsFor(b)));
+            put(betSlots.get(i), plugin.items().build(s, icon, Material.GOLD_NUGGET, tagsFor(b)));
         }
     }
 
@@ -230,12 +278,12 @@ public final class SlotSession implements InventoryHolder {
         Pools.FreeSpins fs = plugin.pools().freeOf(uuid);
         boolean free = fs != null && fs.count > 0;
         String path = busy ? "buttons.spin-busy" : (free ? "buttons.spin-free" : "buttons.spin");
-        inv.setItem(spinSlot, plugin.items().build(gui.getConfigurationSection(path), Material.LIME_CONCRETE,
+        put(spinSlots, plugin.items().build(gui.getConfigurationSection(path), Material.LIME_CONCRETE,
                 tagsFor(currentBet())));
     }
 
     private void renderInfo() {
-        inv.setItem(infoSlot, plugin.items().build(gui.getConfigurationSection("buttons.info"), Material.PAPER,
+        put(infoSlots, plugin.items().build(gui.getConfigurationSection("buttons.info"), Material.PAPER,
                 tagsFor(currentBet())));
     }
 
@@ -244,6 +292,8 @@ public final class SlotSession implements InventoryHolder {
         ItemMeta meta = it.getItemMeta();
         if (meta == null) return;
         Msg msg = plugin.msg();
+        String none = msg.raw("paytable.none");
+        String multFmt = msg.raw("paytable.mult");
         List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
         for (String h : msg.list("paytable.header")) lore.add(msg.item(h));
         for (Symbol s : plugin.rewards().symbols()) {
@@ -256,14 +306,14 @@ public final class SlotSession implements InventoryHolder {
             };
             lore.add(msg.item(msg.raw(lineKey),
                     Placeholder.parsed("symbol", name),
-                    Placeholder.unparsed("pair", s.pair() > 0 ? "x" + trim(s.pair()) : "-"),
-                    Placeholder.unparsed("triple", "x" + trim(s.triple())),
+                    Placeholder.unparsed("pair", s.pair() > 0 ? multFmt.replace("<value>", trim(s.pair())) : none),
+                    Placeholder.unparsed("triple", multFmt.replace("<value>", trim(s.triple()))),
                     Placeholder.unparsed("required", String.valueOf(plugin.rewards().bonusRequired()))));
         }
         for (String f : msg.list("paytable.footer")) lore.add(msg.item(f));
         meta.lore(lore);
         it.setItemMeta(meta);
-        inv.setItem(paytableSlot, it);
+        put(paytableSlots, it);
     }
 
     // ------------------------------------------------------------------ cycle de vie
@@ -316,16 +366,16 @@ public final class SlotSession implements InventoryHolder {
 
     public void click(int slot) {
         if (closed) return;
-        if (slot == spinSlot) {
+        if (contains(spinSlots, slot)) {
             spin();
             return;
         }
-        if (slot == closeSlot) {
+        if (contains(closeSlots, slot)) {
             player.closeInventory();
             return;
         }
-        for (int i = 0; i < betSlots.length && i < plugin.bets().size(); i++) {
-            if (slot != betSlots[i]) continue;
+        for (int i = 0; i < betSlots.size() && i < plugin.bets().size(); i++) {
+            if (!contains(betSlots.get(i), slot)) continue;
             Pools.FreeSpins fs = plugin.pools().freeOf(uuid);
             if (busy || (fs != null && fs.count > 0)) return;
             betIndex = i;
@@ -369,6 +419,7 @@ public final class SlotSession implements InventoryHolder {
                 return;
             }
             for (Tier t : rw.tiers().values()) plugin.pools().add(t.id(), total * t.contribution() / 100.0);
+            plugin.refreshAllPools();
         } else {
             fs.count--;
             plugin.pools().markDirty();
@@ -515,6 +566,7 @@ public final class SlotSession implements InventoryHolder {
             prize = pl.get(curTier.id());
             frozen.put(curTier.id(), prize); // on affiche le montant gagné pendant la roue
             pl.reset(curTier.id(), curTier.seed());
+            plugin.refreshAllPools();
         }
         double pay = line + prize;
         if (pay > 0 && !plugin.economy().deposit(player, pay)) {
@@ -611,10 +663,12 @@ public final class SlotSession implements InventoryHolder {
         FileConfiguration cfg = plugin.configs().config();
         final int duration = Math.max(1, cfg.getInt("animation.win-flash.duration-ticks", 50));
         final int period = Math.max(1, cfg.getInt("animation.win-flash.period-ticks", 5));
-        List<String> specs = gui.getStringList("win-frame");
-        if (specs.isEmpty()) specs = List.of("LIME_STAINED_GLASS_PANE");
         final List<ItemStack> frames = new ArrayList<>();
-        for (String s : specs) frames.add(plugin.items().simple(s));
+        if (frameEnabled) {
+            List<String> specs = gui.getStringList("win-frame.materials");
+            if (specs.isEmpty()) specs = List.of("LIME_STAINED_GLASS_PANE");
+            for (String sp : specs) frames.add(plugin.items().simple(sp));
+        }
 
         task = new BukkitRunnable() {
             int elapsed = 0, step = 0;
@@ -628,8 +682,10 @@ public final class SlotSession implements InventoryHolder {
                 }
                 if (elapsed >= duration) {
                     cancel();
-                    ItemStack f = filler();
-                    for (int s : fillers) inv.setItem(s, f);
+                    if (!frames.isEmpty()) {
+                        ItemStack f = filler();
+                        for (int slot : fillers) inv.setItem(slot, f);
+                    }
                     for (int cell : result.cells()) renderCell(cell / 3, cell % 3, false);
                     if (curTier != null) wheel();
                     else finish();
@@ -637,8 +693,10 @@ public final class SlotSession implements InventoryHolder {
                 }
                 on = !on;
                 for (int cell : result.cells()) renderCell(cell / 3, cell % 3, on);
-                ItemStack frame = frames.get(step++ % frames.size());
-                for (int s : fillers) inv.setItem(s, frame);
+                if (!frames.isEmpty()) {
+                    ItemStack frame = frames.get(step++ % frames.size());
+                    for (int slot : fillers) inv.setItem(slot, frame);
+                }
                 elapsed += period;
             }
         }.runTaskTimer(plugin, 0L, period);

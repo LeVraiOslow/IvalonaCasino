@@ -82,6 +82,11 @@ public final class SlotPlugin extends JavaPlugin {
         bets = List.copyOf(list);
     }
 
+    /** Cagnottes communes : rafraîchit le menu de tous les joueurs qui ont la machine ouverte. */
+    public void refreshAllPools() {
+        for (SlotSession s : new ArrayList<>(sessions.values())) s.refreshLive();
+    }
+
     public Configs configs() { return configs; }
     public Msg msg() { return msg; }
     public EconomyHook economy() { return economy; }

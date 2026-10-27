@@ -40,7 +40,7 @@ public final class SlotCommand implements CommandExecutor, TabCompleter {
                     plugin.reload();
                     msg.send(sender, "reloaded");
                 } catch (Exception e) {
-                    sender.sendMessage("Erreur de rechargement : " + e.getMessage());
+                    msg.send(sender, "reload-error", Placeholder.unparsed("error", String.valueOf(e.getMessage())));
                     plugin.getLogger().severe("Erreur de rechargement : " + e);
                 }
             }
@@ -51,6 +51,16 @@ public final class SlotCommand implements CommandExecutor, TabCompleter {
                     msg.send(sender, "pools-line", tierTag(t.id()),
                             Placeholder.unparsed("amount", plugin.economy().format(plugin.pools().get(t.id()))));
                 }
+            }
+            case "resetpools" -> {
+                if (!sender.hasPermission(ADMIN)) { msg.send(sender, "no-permission"); return true; }
+                for (Rewards.Tier t : plugin.rewards().tiers().values()) plugin.pools().reset(t.id(), t.seed());
+                plugin.refreshAllPools();
+                msg.send(sender, "resetpools-ok");
+            }
+            case "checkitems" -> {
+                if (!sender.hasPermission(ADMIN)) { msg.send(sender, "no-permission"); return true; }
+                checkItems(sender);
             }
             case "setpool" -> {
                 if (!sender.hasPermission(ADMIN)) { msg.send(sender, "no-permission"); return true; }
@@ -104,6 +114,27 @@ public final class SlotCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /** Vérifie chaque "item:" de gui.yml (Material valide ou item Nexo existant). */
+    private void checkItems(CommandSender sender) {
+        Msg msg = plugin.msg();
+        org.bukkit.configuration.file.FileConfiguration gui = plugin.configs().gui();
+        Map<String, String> specs = new java.util.LinkedHashMap<>();
+        for (String k : gui.getKeys(true)) {
+            if (k.endsWith(".item") && gui.isString(k)) specs.put(k, gui.getString(k));
+            else if (k.startsWith("buttons.bet-icons.") && gui.isString(k)) specs.put(k, gui.getString(k));
+        }
+        int i = 0;
+        for (String sp : gui.getStringList("win-frame.materials")) specs.put("win-frame.materials[" + (i++) + "]", sp);
+        int ok = 0;
+        for (Map.Entry<String, String> e : specs.entrySet()) {
+            if (e.getValue() != null && plugin.items().exists(e.getValue())) ok++;
+            else msg.send(sender, "checkitems-missing", Placeholder.unparsed("path", e.getKey()),
+                    Placeholder.unparsed("spec", String.valueOf(e.getValue())));
+        }
+        msg.send(sender, "checkitems-result", Placeholder.unparsed("ok", String.valueOf(ok)),
+                Placeholder.unparsed("total", String.valueOf(specs.size())));
+    }
+
     private void open(CommandSender sender) {
         Msg msg = plugin.msg();
         if (!(sender instanceof Player p)) {
@@ -139,7 +170,7 @@ public final class SlotCommand implements CommandExecutor, TabCompleter {
         List<String> out = new ArrayList<>();
         if (args.length == 1) {
             out.add("pools");
-            if (sender.hasPermission(ADMIN)) out.addAll(List.of("reload", "setpool", "simulate"));
+            if (sender.hasPermission(ADMIN)) out.addAll(List.of("reload", "setpool", "resetpools", "checkitems", "simulate"));
         } else if (args.length == 2 && args[0].equalsIgnoreCase("setpool") && sender.hasPermission(ADMIN)) {
             out.addAll(plugin.rewards().tiers().keySet());
         } else if (args.length == 2 && args[0].equalsIgnoreCase("simulate") && sender.hasPermission(ADMIN)) {
