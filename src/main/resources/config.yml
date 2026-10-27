@@ -12,6 +12,25 @@ general:
   # Sauvegarde des cagnottes (data.yml) toutes les X secondes
   autosave-seconds: 30
 
+# -------------------------- COULEURS DES TEXTES --------------------------
+# Dans TOUS les textes (messages.yml, gui.yml : titre, noms, lores) tu peux mélanger :
+#   MiniMessage    : <red>  <#ff8800>  <gradient:#ff0000:#ffd700>  <bold>
+#   Codes Minecraft: &c &b &6 ... &l (gras) &o (italique) &n &m &k &r (reset)   ("&&" = un "&" littéral)
+#   Hexadécimal    : &#ff8800   ou   #ff8800   ou   &x&f&f&8&8&0&0
+# Comme dans Minecraft, une couleur remet le style à zéro (&6&lTitre &7texte -> "texte" n'est pas en gras).
+text:
+  legacy-codes: true          # active &c, &#rrggbb ...
+  bare-hex: true              # active #rrggbb sans préfixe
+
+# Couleurs nommées personnalisées, utilisables comme balises : <orange>, <pink>...
+colors:
+  orange: "#FFA500"
+  pink: "#FF69B4"
+  lime: "#7CFC00"
+  purple: "#9B30FF"
+  brown: "#8B5A2B"
+  silver: "#C0C0C0"
+
 economy:
   # Locale utilisée pour formater les nombres (ex: en-US, fr-FR)
   locale: "en-US"
@@ -60,6 +79,13 @@ animation:
     fade-in: 10
     stay: 60
     fade-out: 20
+  # Menu bonus (cartes retournées)
+  bonus-game:
+    flip-ticks: 6               # durée de l'animation d'une carte qui se retourne
+    win-hold-ticks: 25          # pause une fois les cartes identiques trouvées
+    rest-reveal-period-ticks: 2 # délai entre chaque carte restante révélée
+    end-hold-ticks: 50          # pause avant le retour à la machine
+    auto-pick-seconds: 20       # le joueur ne clique pas : une carte est retournée au hasard (0 = désactivé)
 
 # -------------------------- SONS --------------------------
 # Format : "clé_du_son;volume;pitch;délai_en_ticks(optionnel)"
@@ -76,6 +102,10 @@ sounds:
   wheel-start: "minecraft:block.beacon.activate;1;1.2"
   wheel-tick: "minecraft:block.note_block.pling;0.8;1.4"
   wheel-stop: "minecraft:entity.player.levelup;1;1"
+  bonus-open: "minecraft:block.ender_chest.open;1;1"
+  bonus-flip: "minecraft:item.book.page_turn;1;1.2"
+  bonus-match: "minecraft:block.note_block.bell;1;1.6"
+  bonus-win: "minecraft:ui.toast.challenge_complete;1;1.2"
 
 # -------------------------- EFFETS PAR RÉSULTAT --------------------------
 # Catégories : lose, pair, triple, big, free-spins, mini, major, giant, jackpot

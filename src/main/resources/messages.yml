@@ -2,6 +2,8 @@
 #  SlotMachine - messages.yml  (TOUS LES TEXTES - format MiniMessage)
 #  Laisse un message vide ("") pour le désactiver.
 #  <prefix> est remplacé par le préfixe ci-dessous.
+#  Couleurs : MiniMessage (<red>, <#ff8800>), codes Minecraft (&c, &l, &r) ou hex (&#ff8800, #ff8800).
+#  Exemple : "&6&lSLOTS &8» &7Tu gagnes &#00ff88<win>"
 # ====================================================================
 
 prefix: "<gold><bold>SLOTS</bold> <dark_gray>» <reset>"
@@ -57,6 +59,7 @@ results:
   major: "<prefix><tier> <gray>! Tu remportes <yellow><win>"
   giant: "<prefix><tier> <gray>! Tu remportes <yellow><win>"
   jackpot: "<prefix><tier> <gray>!!! Tu remportes <yellow><win>"
+  bonus-start: "<prefix><light_purple><bold>BONUS !</bold> <gray>Retourne les cartes : trouve <yellow><need></yellow> cartes identiques !"
   free-spin-lose: ""
   free-spins-end: "<prefix><light_purple>Fin des free spins ! <gray>Total gagné : <yellow><series-win>"
 

@@ -175,3 +175,59 @@ symbols:
     item: HEART_OF_THE_SEA           # ex: "nexo:slot_bonus"
     name: "<aqua><bold>BONUS"
     lore: ["<gray>3+ n'importe où = roue des cagnottes"]
+
+# ====================================================================
+#  MENU BONUS : cartes retournées (déclenché par 3 symboles BONUS)
+#  Le joueur retourne les cartes ; 3 cartes identiques = il gagne ce palier (Mini, Major...).
+#  Mêmes règles que le reste : "item" = Material ou "nexo:id", textes en MiniMessage / &c / #hex.
+#  Placeholders des items : <tier> <amount> <min-bet> <found> <need>
+# ====================================================================
+bonus-game:
+  title: "<gold><bold>BONUS <gray>- Trouve 3 cartes identiques"
+  rows: 6
+  # 21 emplacements de cartes (3 rangées de 7)
+  cards: [10, 11, 12, 13, 14, 15, 16,
+          19, 20, 21, 22, 23, 24, 25,
+          28, 29, 30, 31, 32, 33, 34]
+  # Cases vides : vides par défaut (mets enabled: true pour les remplir)
+  filler:
+    enabled: false
+    item: BLACK_STAINED_GLASS_PANE
+    name: " "
+    hide-tooltip: true
+  # Progression (cartes trouvées par palier)
+  info:
+    slots: [4]
+    item: PAPER                     # ex: "nexo:bonus_info"
+    name: "<gold><bold>Progression"
+    lore:
+      - "<gray>Trouve <yellow><need></yellow> cartes identiques"
+      - ""
+  tier-line: "<tier> <gray>: <yellow><found><gray>/<yellow><need>"
+  # Carte face cachée
+  card-hidden:
+    item: ENDER_CHEST               # ex: "nexo:card_back"
+    name: "<gray><bold>Carte mystère"
+    lore: ["<yellow>Clique pour la retourner !"]
+  # Carte en train de se retourner (animation courte)
+  card-flip:
+    item: PAPER                     # ex: "nexo:card_flip"
+    name: "<white>..."
+  # Carte retournée, par palier (la clé = celle de rewards.yml)
+  revealed:
+    mini:
+      item: COPPER_INGOT            # ex: "nexo:card_mini"
+      name: "<#cd7f32><bold>MINI"
+      lore: ["<gray>Cagnotte : <yellow><amount>"]
+    major:
+      item: GOLD_BLOCK              # ex: "nexo:card_major"
+      name: "<yellow><bold>MAJOR"
+      lore: ["<gray>Cagnotte : <yellow><amount>"]
+    giant:
+      item: DIAMOND_BLOCK           # ex: "nexo:card_giant"
+      name: "<aqua><bold>GIANT"
+      lore: ["<gray>Cagnotte : <yellow><amount>"]
+    jackpot:
+      item: NETHER_STAR             # ex: "nexo:card_jackpot"
+      name: "<gradient:#ff0000:#ffd700><bold>JACKPOT"
+      lore: ["<gray>Cagnotte : <yellow><amount>"]

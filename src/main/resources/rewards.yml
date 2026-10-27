@@ -77,14 +77,27 @@ free-spins:
 
 # -------------------------- BONUS : ROUE DES CAGNOTTES --------------------------
 bonus:
-  required: 3                 # nombre de symboles BONUS pour déclencher la roue
+  required: 3                 # nombre de symboles BONUS sur la grille pour déclencher le bonus
+  # CARDS : menu de cartes retournées (21 cartes, il faut en trouver "match-required" identiques)
+  # WHEEL : ancienne roue (les 4 icônes de cagnotte s'allument tour à tour)
+  mode: CARDS
+  match-required: 3           # nombre de cartes identiques à trouver pour gagner
+  # Cartes affichées une fois la partie gagnée (décor des cartes non retournées) : poids par palier
+  card-weights:
+    mini: 9
+    major: 6
+    giant: 3
+    jackpot: 3
 
 # Cagnottes progressives, COMMUNES À TOUS LES JOUEURS (une seule cagnotte par palier, stockée dans data.yml).
 # Chaque mise payante de n'importe quel joueur les fait augmenter ; le gagnant les remporte puis
 # elles repartent de "seed".
 #  seed         : montant de départ (et de remise à zéro après un gain)
 #  contribution : % de chaque mise payante (mise totale) versé dans la cagnotte
-#  wheel-weight : probabilité relative que la roue s'arrête sur ce palier
+#  wheel-weight : chance RELATIVE que le bonus se termine sur ce palier (cartes ET roue).
+#                 Plus c'est bas, plus le palier est rare : avec 60/28/10/2 et la mise maximale,
+#                 Mini = 60 %, Major = 28 %, Giant = 10 %, Jackpot = 2 %.
+#                 Seuls les paliers autorisés par la mise (min-bet) participent au tirage.
 #  min-bet      : mise TOTALE minimale pour pouvoir gagner ce palier (0 = aucune)
 #
 # Barème pour des mises de 1.000 / 10.000 / 100.000 / 1.000.000 :
