@@ -31,6 +31,9 @@ public final class Rewards {
     private final boolean autoPlay;
     private final int autoDelay;
     private final double bigWinMultiplier;
+    private final boolean bonusCards;
+    private final int matchRequired;
+    private final Map<String, Integer> cardWeights = new LinkedHashMap<>();
 
     Rewards(SlotPlugin plugin, FileConfiguration cfg) {
         ConfigurationSection sec = cfg.getConfigurationSection("symbols");
@@ -81,6 +84,10 @@ public final class Rewards {
         autoPlay = cfg.getBoolean("free-spins.auto-play", true);
         autoDelay = Math.max(1, cfg.getInt("free-spins.auto-delay-ticks", 40));
         bonusRequired = Math.max(1, cfg.getInt("bonus.required", 3));
+        bonusCards = !"WHEEL".equalsIgnoreCase(cfg.getString("bonus.mode", "CARDS"));
+        matchRequired = Math.max(2, cfg.getInt("bonus.match-required", 3));
+        ConfigurationSection cw = cfg.getConfigurationSection("bonus.card-weights");
+        if (cw != null) for (String k : cw.getKeys(false)) cardWeights.put(k, Math.max(0, cw.getInt(k)));
         bigWinMultiplier = cfg.getDouble("big-win-multiplier", 20);
     }
 
@@ -103,6 +110,9 @@ public final class Rewards {
     public List<Symbol> symbols() { return symbols; }
     public Map<String, Tier> tiers() { return tiers; }
     public int bonusRequired() { return bonusRequired; }
+    public boolean bonusCards() { return bonusCards; }
+    public int matchRequired() { return matchRequired; }
+    public Map<String, Integer> cardWeights() { return cardWeights; }
     public boolean retrigger() { return retrigger; }
     public double freeMultiplier() { return freeMultiplier; }
     public boolean autoPlay() { return autoPlay; }

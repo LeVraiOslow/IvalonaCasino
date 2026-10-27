@@ -158,7 +158,7 @@ public final class SlotCommand implements CommandExecutor, TabCompleter {
 
     private TagResolver tierTag(String id) {
         String name = plugin.configs().messages().getString("tiers." + id, id.toUpperCase(Locale.ROOT));
-        return Placeholder.parsed("tier", name);
+        return Placeholder.parsed("tier", plugin.msg().color(name));
     }
 
     private static String pct(Double v) {

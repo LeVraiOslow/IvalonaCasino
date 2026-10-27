@@ -103,16 +103,15 @@ public final class ItemFactory {
     /** specOverride (optionnel) remplace la clé "item" de la section. */
     public ItemStack build(ConfigurationSection s, String specOverride, Material fallback, TagResolver... r) {
         if (s == null) return new ItemStack(fallback);
-        String spec = (specOverride != null && !specOverride.isBlank()) ? specOverride : s.getString("item", fallback.name());
+        String own = s.getString("item");
+        String spec = (specOverride != null && !specOverride.isBlank()) ? specOverride : (own != null ? own : fallback.name());
         ItemStack it = base(spec, fallback);
         ItemMeta meta = it.getItemMeta();
         if (meta == null) return it;
 
         Msg msg = plugin.msg();
-        if (s.contains("name")) {
-            String name = s.getString("name", "");
-            meta.displayName(msg.item(name, r));
-        }
+        String name = s.getString("name");
+        if (name != null) meta.displayName(msg.item(name, r));
         List<String> lore = s.getStringList("lore");
         if (!lore.isEmpty()) {
             meta.lore(lore.stream().map(l -> msg.item(l, r)).toList());

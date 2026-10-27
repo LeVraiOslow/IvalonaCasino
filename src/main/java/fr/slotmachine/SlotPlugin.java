@@ -71,6 +71,7 @@ public final class SlotPlugin extends JavaPlugin {
     /** Recharge config.yml, messages.yml, rewards.yml et gui.yml. */
     public void reload() {
         configs.load();
+        msg.reload();
         rewards = new Rewards(this, configs.rewards());
         engine.reload();
         items.clearCache();

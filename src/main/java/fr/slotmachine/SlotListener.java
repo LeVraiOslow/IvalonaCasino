@@ -22,6 +22,11 @@ public final class SlotListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onClick(InventoryClickEvent e) {
+        if (e.getView().getTopInventory().getHolder(false) instanceof BonusGame bonus) {
+            e.setCancelled(true);
+            if (e.getClickedInventory() == e.getView().getTopInventory()) bonus.click(e.getRawSlot());
+            return;
+        }
         if (!(e.getView().getTopInventory().getHolder(false) instanceof SlotSession session)) return;
         // Tout est bloqué (y compris shift-clic depuis l'inventaire du joueur)
         e.setCancelled(true);
@@ -32,12 +37,15 @@ public final class SlotListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDrag(InventoryDragEvent e) {
-        if (e.getView().getTopInventory().getHolder(false) instanceof SlotSession) e.setCancelled(true);
+        Object holder = e.getView().getTopInventory().getHolder(false);
+        if (holder instanceof SlotSession || holder instanceof BonusGame) e.setCancelled(true);
     }
 
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        if (e.getInventory().getHolder(false) instanceof SlotSession session) session.onClose();
+        Object holder = e.getInventory().getHolder(false);
+        if (holder instanceof SlotSession session) session.onClose();
+        else if (holder instanceof BonusGame bonus) bonus.onClose();
     }
 
     @EventHandler

@@ -60,6 +60,8 @@ public final class SlotSession implements InventoryHolder {
     // état
     private int betIndex;
     private boolean busy, settled, closed;
+    private boolean switching;          // vrai pendant le passage menu machine <-> menu bonus
+    private BonusGame bonusGame;
     private double lastWin;
     private String highlight;
     private final Map<String, Double> frozen = new HashMap<>();
@@ -305,7 +307,7 @@ public final class SlotSession implements InventoryHolder {
                 case BONUS -> "paytable.line-bonus";
             };
             lore.add(msg.item(msg.raw(lineKey),
-                    Placeholder.parsed("symbol", name),
+                    Placeholder.parsed("symbol", msg.color(name)),
                     Placeholder.unparsed("pair", s.pair() > 0 ? multFmt.replace("<value>", trim(s.pair())) : none),
                     Placeholder.unparsed("triple", multFmt.replace("<value>", trim(s.triple()))),
                     Placeholder.unparsed("required", String.valueOf(plugin.rewards().bonusRequired()))));
@@ -341,8 +343,12 @@ public final class SlotSession implements InventoryHolder {
     }
 
     public void onClose() {
-        if (closed) return;
+        if (switching || closed) return;
         closed = true;
+        if (bonusGame != null) {
+            bonusGame.cancel();
+            bonusGame = null;
+        }
         if (task != null) task.cancel();
         if (refreshTask != null) refreshTask.cancel();
         if (busy) {
@@ -631,7 +637,7 @@ public final class SlotSession implements InventoryHolder {
                 Placeholder.unparsed("mult", trim(mult)),
                 Placeholder.unparsed("spins", String.valueOf(awarded)),
                 Placeholder.unparsed("prize", fmt(prize)),
-                Placeholder.parsed("tier", tierName),
+                Placeholder.parsed("tier", msg.color(tierName)),
                 Placeholder.unparsed("player", player.getName()),
                 Placeholder.unparsed("free-left", String.valueOf(fs == null ? 0 : fs.count)),
                 Placeholder.unparsed("series-win", fmt(seriesWon)));
@@ -687,7 +693,7 @@ public final class SlotSession implements InventoryHolder {
                         for (int slot : fillers) inv.setItem(slot, f);
                     }
                     for (int cell : result.cells()) renderCell(cell / 3, cell % 3, false);
-                    if (curTier != null) wheel();
+                    if (curTier != null) startBonus();
                     else finish();
                     return;
                 }
@@ -700,6 +706,59 @@ public final class SlotSession implements InventoryHolder {
                 elapsed += period;
             }
         }.runTaskTimer(plugin, 0L, period);
+    }
+
+    // ------------------------------------------------------------------ bonus : menu de cartes
+
+    /** Montant affiché d'une cagnotte (le gain en cours est figé pendant le bonus). */
+    double poolAmount(String id) {
+        return frozen.containsKey(id) ? frozen.get(id) : plugin.pools().get(id);
+    }
+
+    private List<Tier> eligibleTiers() {
+        List<Tier> out = new ArrayList<>();
+        for (Tier t : plugin.rewards().tiers().values()) {
+            if (t.wheelWeight() > 0 && curTotal >= t.minBet()) out.add(t);
+        }
+        if (curTier != null && out.stream().noneMatch(t -> t.id().equals(curTier.id()))) out.add(curTier);
+        return out;
+    }
+
+    private void startBonus() {
+        if (!plugin.rewards().bonusCards()) {
+            wheel();
+            return;
+        }
+        try {
+            bonusGame = new BonusGame(plugin, this, player, curTier, eligibleTiers());
+            plugin.msg().send(player, "results.bonus-start",
+                    Placeholder.unparsed("need", String.valueOf(plugin.rewards().matchRequired())));
+            switching = true; // ouvrir un autre inventaire ferme celui-ci : ne pas terminer la session
+            try {
+                bonusGame.open();
+            } finally {
+                switching = false;
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Menu bonus impossible, roue utilisée à la place : " + e);
+            bonusGame = null;
+            wheel();
+        }
+    }
+
+    /** Appelé par BonusGame à la fin de la partie : retour sur la machine classique. */
+    void bonusFinished() {
+        bonusGame = null;
+        if (closed) return;
+        highlight = curTier == null ? null : curTier.id();
+        switching = true;
+        try {
+            player.openInventory(inv);
+        } finally {
+            switching = false;
+        }
+        renderPools();
+        finish();
     }
 
     // ------------------------------------------------------------------ roue des cagnottes
