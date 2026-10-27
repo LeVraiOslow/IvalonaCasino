@@ -137,7 +137,44 @@ buttons:
     slots: [51]
     item: BOOK                       # ex: "nexo:btn_paytable"
     name: "<gold><bold>Table des gains"
-    lore: []                         # les lignes de gains sont ajoutées automatiquement (messages.yml -> paytable)
+    # Description COMPLÈTE de la table des gains : une ligne par entrée, tu peux tout modifier / supprimer / ajouter.
+    # Placeholders (valeurs prises dans rewards.yml, donc toujours à jour) :
+    #   <cherry-name> <cherry-pair> <cherry-triple>   (idem pour lemon, grape, bell, bar, seven, wild, scatter, bonus :
+    #                                                  <ID-name> <ID-pair> <ID-triple>)
+    #   <free-spins-3> <free-spins-4> <free-spins-5> <free-spins-6>   free spins selon le nombre de scatters
+    #   <free-multiplier> <bonus-required> <match-required>
+    #   <tier-mini> <pool-mini> <minbet-mini>          (idem major, giant, jackpot : nom, cagnotte actuelle, mise minimale)
+    #   <bet> <total> <lines> <balance> <last-win> <free-spins>
+    # Si "lore" est vide ([]), le plugin génère l'ancien affichage depuis messages.yml -> paytable.
+    lore:
+      - "<dark_gray>------------------------------"
+      - "<gold><bold>TABLE DES GAINS <gray>(x mise par ligne)"
+      - "<dark_gray>------------------------------"
+      - ""
+      - "<cherry-name> <gray>paire <yellow><cherry-pair> <dark_gray>| <gray>triple <green><cherry-triple>"
+      - "<lemon-name> <gray>paire <yellow><lemon-pair> <dark_gray>| <gray>triple <green><lemon-triple>"
+      - "<grape-name> <gray>paire <yellow><grape-pair> <dark_gray>| <gray>triple <green><grape-triple>"
+      - "<bell-name> <gray>paire <yellow><bell-pair> <dark_gray>| <gray>triple <green><bell-triple>"
+      - "<bar-name> <gray>paire <yellow><bar-pair> <dark_gray>| <gray>triple <green><bar-triple>"
+      - "<seven-name> <gray>paire <yellow><seven-pair> <dark_gray>| <gray>triple <green><seven-triple>"
+      - ""
+      - "<wild-name> <gray>remplace les autres symboles"
+      - "<gray>  3 <wild-name> <gray>sur la ligne : <green><wild-triple>"
+      - ""
+      - "<scatter-name> <gray>n'importe où sur la grille :"
+      - "<gray>  3 = <light_purple><free-spins-3> <gray>free spins <dark_gray>| <gray>4 = <light_purple><free-spins-4>"
+      - "<gray>  5 = <light_purple><free-spins-5> <dark_gray>| <gray>6 = <light_purple><free-spins-6>"
+      - "<gray>  Gains des free spins : <yellow>x<free-multiplier>"
+      - ""
+      - "<bonus-name> <gray><bonus-required> n'importe où : <light_purple>jeu des cartes"
+      - "<gray>  Trouve <yellow><match-required> <gray>cartes identiques pour gagner :"
+      - "<gray>  <tier-mini> <dark_gray>: <yellow><pool-mini>"
+      - "<gray>  <tier-major> <dark_gray>: <yellow><pool-major> <dark_gray>(dès <minbet-major>)"
+      - "<gray>  <tier-giant> <dark_gray>: <yellow><pool-giant> <dark_gray>(dès <minbet-giant>)"
+      - "<gray>  <tier-jackpot> <dark_gray>: <yellow><pool-jackpot> <dark_gray>(dès <minbet-jackpot>)"
+      - ""
+      - "<dark_gray>Cagnottes communes à tous les joueurs"
+      - "<dark_gray>------------------------------"
 
 # Symboles des rouleaux (la clé doit correspondre à rewards.yml).
 symbols:
