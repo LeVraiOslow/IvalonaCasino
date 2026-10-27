@@ -39,6 +39,8 @@ Le jar est généré dans `target/SlotMachine-1.0.0.jar` (JDK 25 requis). Dépos
 | `/roulette reload` | `slotmachine.admin` |
 | `/roulette setpool <palier> <montant>` | `slotmachine.admin` |
 | `/roulette simulate <tours>` | `slotmachine.admin` |
+| `/roulette resetpools` | `slotmachine.admin` (remet les cagnottes à leur `seed`) |
+| `/roulette checkitems` | `slotmachine.admin` (liste les items vanilla/Nexo introuvables) |
 
 ## Équilibrage
 Après toute modification des poids ou gains, lance `/roulette simulate 1000000` pour voir le RTP estimé
