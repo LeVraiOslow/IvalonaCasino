@@ -12,7 +12,7 @@
 #  Vérifie tes items avec  /roulette checkitems  (liste ceux qui sont introuvables).
 #
 #  PLUSIEURS SLOTS POUR UN MÊME OBJET : remplace "slot: 3" par "slots: [3, 4, 12, 13]".
-#  Valable pour : chaque cagnotte (pools.*), spin, info, paytable, close.
+#  Valable pour : chaque cagnotte (pools.*), spin, info, paytable.
 #  Pour les mises : buttons.bet.slots = une entrée par mise, chaque entrée est un slot ou une liste
 #  de slots, ex:  [[45, 46], [47, 48], [49, 50], [51, 52]]
 #
@@ -138,10 +138,6 @@ buttons:
     item: BOOK                       # ex: "nexo:btn_paytable"
     name: "<gold><bold>Table des gains"
     lore: []                         # les lignes de gains sont ajoutées automatiquement (messages.yml -> paytable)
-  close:
-    slots: [53]
-    item: BARRIER                    # ex: "nexo:btn_close"
-    name: "<red>Fermer"
 
 # Symboles des rouleaux (la clé doit correspondre à rewards.yml).
 symbols:
